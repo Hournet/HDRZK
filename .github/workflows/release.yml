@@ -1,0 +1,211 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (example: v1.0.2)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version-tag: ${{ steps.get_tag.outputs.tag }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Get Release Tag
+        id: get_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
+            echo "Using manual tag: ${{ github.event.inputs.release_tag }}"
+          else
+            tag=${GITHUB_REF#refs/tags/}
+            echo "tag=$tag" >> $GITHUB_OUTPUT
+            echo "Using git tag: $tag"
+          fi
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Setup Keystore
+        run: |
+          echo "Setting up keystore..."
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > keystore.jks
+          ls -la keystore.jks
+
+      - name: Validate Secrets
+        run: |
+          echo "Validating required secrets..."
+          if [[ -z "${{ secrets.KEYSTORE_PASSWORD }}" ]]; then
+            echo "❌ KEYSTORE_PASSWORD is missing"
+            exit 1
+          fi
+          if [[ -z "${{ secrets.KEY_ALIAS }}" ]]; then
+            echo "❌ KEY_ALIAS is missing"
+            exit 1
+          fi
+          if [[ -z "${{ secrets.KEY_PASSWORD }}" ]]; then
+            echo "❌ KEY_PASSWORD is missing"
+            exit 1
+          fi
+          echo "✅ All secrets are present"
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "Building release APK..."
+          ./gradlew clean
+          ./gradlew checkSigning
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Verify APK Build
+        run: |
+          apk_path="app/build/outputs/apk/release/app-release.apk"
+          if [[ ! -f "$apk_path" ]]; then
+            echo "❌ APK not found at $apk_path"
+            ls -la app/build/outputs/apk/release/
+            exit 1
+          fi
+          
+          file_size=$(stat -f%z "$apk_path" 2>/dev/null || stat -c%s "$apk_path" 2>/dev/null || echo "0")
+          echo "✅ APK built successfully"
+          echo "📦 APK size: $(($file_size / 1024 / 1024)) MB"
+
+      - name: Rename APK
+        run: |
+          version_tag="${{ steps.get_tag.outputs.tag }}"
+          version_clean=${version_tag#v}
+          mv app/build/outputs/apk/release/app-release.apk hdrzk-${version_clean}.apk
+          echo "✅ APK renamed to hdrzk-${version_clean}.apk"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hdrzk-apk
+          path: hdrzk-*.apk
+          compression-level: 6
+          retention-days: 30
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: hdrzk-apk
+
+      - name: List Downloaded Files
+        run: |
+          echo "Downloaded files:"
+          ls -la hdrzk-*.apk
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          tag="${{ needs.build.outputs.version-tag }}"
+          version_clean=${tag#v}
+          apk_file=$(ls hdrzk-*.apk | head -1)
+          apk_size=$(du -h "$apk_file" | cut -f1)
+          
+          cat > release_notes.md << 'EOF'
+          # 🚀 HDRZK ${{ needs.build.outputs.version-tag }}
+          
+          ## 📱 Что нового:
+          
+          - ✨ Система автоматического обновления
+          - 🔄 Проверка обновлений при запуске приложения  
+          - 📊 Прогресс-бар загрузки обновлений
+          - 🔒 Безопасная загрузка через GitHub Releases
+          - 🎨 Улучшенный пользовательский интерфейс
+          - 🐛 Исправлены различные ошибки и улучшена стабильность
+          
+          ## 📋 Установка:
+          
+          ### Первая установка:
+          1. 📥 Скачайте файл `hdrzk-release.apk`
+          2. ⚙️ Разрешите установку из неизвестных источников в настройках
+          3. 📱 Установите приложение
+          
+          ### Автоматическое обновление:
+          - Приложение автоматически проверит наличие обновлений при запуске
+          - При обнаружении новой версии появится уведомление
+          - Следуйте инструкциям для обновления
+          
+          ## ℹ️ Информация о релизе:
+          
+          - **📦 Размер APK:** $apk_size
+          - **🏷️ Версия:** $version_clean  
+          - **🤖 Минимальная версия Android:** 11 (API 30)
+          - **🎯 Целевая версия Android:** 14 (API 34+)
+          
+          ## 🔧 Технические детали:
+          
+          - Подписано цифровой подписью
+          - Оптимизировано ProGuard/R8
+          - Поддержка всех современных архитектур процессоров
+          - Совместимость с темной темой системы
+          
+          ---
+          
+          > 💡 **Совет:** Если у вас возникли проблемы с установкой, убедитесь что разрешена установка из неизвестных источников и достаточно свободного места на устройстве (минимум 50 МБ).
+          
+          📞 **Поддержка:** При возникновении проблем создайте issue в репозитории.
+          EOF
+
+      - name: Create/Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.version-tag }}
+          name: "🚀 HDRZK ${{ needs.build.outputs.version-tag }}"
+          body_path: release_notes.md
+          files: |
+            hdrzk-*.apk
+          draft: false
+          prerelease: false
+          make_latest: true
+          generate_release_notes: false
+
+      - name: Release Summary
+        run: |
+          tag="${{ needs.build.outputs.version-tag }}"
+          apk_file=$(ls hdrzk-*.apk | head -1)
+          apk_size=$(du -h "$apk_file" | cut -f1)
+          
+          echo "## 🎉 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** $tag" >> $GITHUB_STEP_SUMMARY  
+          echo "- **APK File:** $apk_file" >> $GITHUB_STEP_SUMMARY
+          echo "- **APK Size:** $apk_size" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/$tag" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Release created successfully!**" >> $GITHUB_STEP_SUMMARY

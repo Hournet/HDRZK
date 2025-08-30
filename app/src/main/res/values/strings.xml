@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">HDRZK</string>
+
+    <!-- Строки для автообновления -->
+    <string name="update_available">Доступно обновление</string>
+    <string name="update_available_text">Доступна новая версия %1$s. Хотите обновить приложение?</string>
+    <string name="update">Обновить</string>
+    <string name="dismiss">Отмена</string>
+</resources>
