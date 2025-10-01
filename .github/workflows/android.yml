@@ -11,7 +11,6 @@ on:
         required: true
         type: string
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,29 +25,38 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           java-package: 'jdk'
-      #          cache: 'gradle'
+          cache: 'gradle'
 
-      - name: Build APK
-        run: |
-          ./gradlew assembleRelease
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Set up Keystore
         run: |
-          sudo apt update -y || true
-          sudo apt install -y --no-install-recommends coreutils
           mkdir -p $RUNNER_TEMP/keystores
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > $RUNNER_TEMP/keystores/keystore.jks
 
-      - name: Sign APK
+      - name: Build and Sign APK
+        env:
+          CI: true
+          KEYSTORE_PATH: ${{ runner.temp }}/keystores/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ANDROID_SDK_PATH=$ANDROID_HOME/build-tools/36.1.0/apksigner
-          $ANDROID_SDK_PATH sign \
-            --ks $RUNNER_TEMP/keystores/keystore.jks \
-            --ks-key-alias ${{ secrets.KEY_ALIAS }} \
-            --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} \
-            --key-pass pass:${{ secrets.KEY_PASSWORD }} \
-            --out app-release.apk \
-            app/build/outputs/apk/release/app-release.apk
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk app-release.apk
+
+      - name: Verify APK Signature
+        run: |
+          # Находим актуальную версию apksigner
+          APKSIGNER=$(find $ANDROID_HOME/build-tools -name "apksigner" | sort -V | tail -n 1)
+          echo "Using apksigner: $APKSIGNER"
+          
+          # Проверяем подпись
+          $APKSIGNER verify --verbose app-release.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -64,25 +72,26 @@ jobs:
       contents: write
 
     steps:
-      #      - name: Checkout Changes
-      #        uses: actions/checkout@v4
-      #        with:
-      #          sparse-checkout: |
-      #            CHANGE.md
-      #          sparse-checkout-cone-mode: false
-
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           name: apk-artifact
 
-      #      - name: Generate Changelog
-      #        run: |
-      #          cat CHANGE.md > CHANGE.txt
+      - name: Get Release Tag
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
           files: |
             app-release.apk
-#          body_path: CHANGE.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: true
