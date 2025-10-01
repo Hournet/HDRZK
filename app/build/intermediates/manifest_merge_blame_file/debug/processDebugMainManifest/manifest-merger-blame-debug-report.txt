@@ -1,0 +1,229 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.hournet.hdrzk.debug"
+4    android:versionCode="1"
+5    android:versionName="0.0.2" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="30"
+9        android:targetSdkVersion="36" />
+10
+11    <!-- Базовые разрешения -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:6:5-67
+12-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:6:22-64
+13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+13-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:7:5-79
+13-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:7:22-76
+14
+15    <!-- Разрешения для работы с файлами -->
+16    <uses-permission
+16-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:10:5-11:38
+17        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+17-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:10:22-78
+18        android:maxSdkVersion="28" />
+18-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:11:9-35
+19    <uses-permission
+19-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:12:5-13:38
+20        android:name="android.permission.READ_EXTERNAL_STORAGE"
+20-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:12:22-77
+21        android:maxSdkVersion="32" />
+21-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:13:9-35
+22
+23    <!-- Разрешение для установки APK -->
+24    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+24-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:16:5-83
+24-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:16:22-80
+25
+26    <!-- Разрешение для получения информации о пакетах -->
+27    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+27-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:19:5-20:53
+27-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:19:22-74
+28
+29    <permission
+29-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:22:5-24:47
+30        android:name="com.hournet.hdrzk.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+30-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:23:9-81
+31        android:protectionLevel="signature" />
+31-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:24:9-44
+32
+33    <uses-permission android:name="com.hournet.hdrzk.debug.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+33-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:26:5-97
+33-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:26:22-94
+34
+35    <application
+35-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:22:5-68:19
+36        android:allowBackup="true"
+36-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:23:9-35
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.17.0] /Users/hournet/.gradle/caches/8.13/transforms/2c4a859bd1eba3a5b48edfb5281af7c2/transformed/core-1.17.0/AndroidManifest.xml:28:18-86
+38        android:dataExtractionRules="@xml/data_extraction_rules"
+38-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:24:9-65
+39        android:debuggable="true"
+40        android:extractNativeLibs="false"
+41        android:fullBackupContent="@xml/backup_rules"
+41-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:25:9-54
+42        android:icon="@mipmap/ic_launcher"
+42-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:26:9-43
+43        android:label="@string/app_name"
+43-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:27:9-41
+44        android:networkSecurityConfig="@xml/network_security_config"
+44-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:33:9-69
+45        android:requestLegacyExternalStorage="true"
+45-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:31:9-52
+46        android:roundIcon="@mipmap/ic_launcher_round"
+46-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:28:9-54
+47        android:supportsRtl="true"
+47-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:29:9-35
+48        android:theme="@style/Theme.HDRZK"
+48-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:30:9-43
+49        android:usesCleartextTraffic="false" >
+49-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:32:9-45
+50
+51        <!-- FileProvider для безопасного доступа к файлам -->
+52        <provider
+53            android:name="androidx.core.content.FileProvider"
+53-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:37:13-62
+54            android:authorities="com.hournet.hdrzk.debug.provider"
+54-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:38:13-60
+55            android:exported="false"
+55-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:39:13-37
+56            android:grantUriPermissions="true" >
+56-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:40:13-47
+57            <meta-data
+57-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:41:13-43:58
+58                android:name="android.support.FILE_PROVIDER_PATHS"
+58-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:42:17-67
+59                android:resource="@xml/provider_paths" />
+59-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:43:17-55
+60        </provider>
+61
+62        <!-- Основная активность -->
+63        <activity
+63-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:47:9-67:20
+64            android:name="com.hournet.hdrzk.MainActivity"
+64-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:48:13-41
+65            android:exported="true"
+65-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:49:13-36
+66            android:label="@string/app_name"
+66-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:50:13-45
+67            android:launchMode="singleTop"
+67-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:52:13-43
+68            android:screenOrientation="portrait"
+68-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:53:13-49
+69            android:theme="@style/Theme.HDRZK" >
+69-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:51:13-47
+70            <intent-filter>
+70-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:54:13-57:29
+71                <action android:name="android.intent.action.MAIN" />
+71-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:55:17-69
+71-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:55:25-66
+72
+73                <category android:name="android.intent.category.LAUNCHER" />
+73-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:56:17-77
+73-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:56:27-74
+74            </intent-filter>
+75
+76            <!-- Intent filter для обработки установки APK -->
+77            <intent-filter>
+77-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:60:13-66:29
+78                <action android:name="android.intent.action.VIEW" />
+78-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:61:17-69
+78-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:61:25-66
+79
+80                <category android:name="android.intent.category.DEFAULT" />
+80-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:62:17-76
+80-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:62:27-73
+81                <category android:name="android.intent.category.BROWSABLE" />
+81-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:63:17-78
+81-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:63:27-75
+82
+83                <data
+83-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:64:17-65:82
+84                    android:mimeType="application/vnd.android.package-archive"
+84-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:65:21-79
+85                    android:scheme="content" />
+85-->/Users/hournet/AndroidStudioProjects/HDRZK/app/src/main/AndroidManifest.xml:64:23-47
+86            </intent-filter>
+87        </activity>
+88        <activity
+88-->[androidx.compose.ui:ui-tooling-android:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/cf829d647776668b959a43e66ece19c4/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+89            android:name="androidx.compose.ui.tooling.PreviewActivity"
+89-->[androidx.compose.ui:ui-tooling-android:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/cf829d647776668b959a43e66ece19c4/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+90            android:exported="true" />
+90-->[androidx.compose.ui:ui-tooling-android:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/cf829d647776668b959a43e66ece19c4/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+91        <activity
+91-->[androidx.compose.ui:ui-test-manifest:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/57a1b286d881ae6bd2115dcb309468d8/transformed/ui-test-manifest-1.7.0/AndroidManifest.xml:23:9-25:39
+92            android:name="androidx.activity.ComponentActivity"
+92-->[androidx.compose.ui:ui-test-manifest:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/57a1b286d881ae6bd2115dcb309468d8/transformed/ui-test-manifest-1.7.0/AndroidManifest.xml:24:13-63
+93            android:exported="true" />
+93-->[androidx.compose.ui:ui-test-manifest:1.7.0] /Users/hournet/.gradle/caches/8.13/transforms/57a1b286d881ae6bd2115dcb309468d8/transformed/ui-test-manifest-1.7.0/AndroidManifest.xml:25:13-36
+94
+95        <provider
+95-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+96            android:name="androidx.startup.InitializationProvider"
+96-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+97            android:authorities="com.hournet.hdrzk.debug.androidx-startup"
+97-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+98            android:exported="false" >
+98-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+99            <meta-data
+99-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+100                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+100-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+101                android:value="androidx.startup" />
+101-->[androidx.emoji2:emoji2:1.3.0] /Users/hournet/.gradle/caches/8.13/transforms/100424f96cce74e6c3e1c2d9a84e93d3/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+102            <meta-data
+102-->[androidx.lifecycle:lifecycle-process:2.9.2] /Users/hournet/.gradle/caches/8.13/transforms/bb0c005fb4685efdbfc17a4cb7553d56/transformed/lifecycle-process-2.9.2/AndroidManifest.xml:29:13-31:52
+103                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+103-->[androidx.lifecycle:lifecycle-process:2.9.2] /Users/hournet/.gradle/caches/8.13/transforms/bb0c005fb4685efdbfc17a4cb7553d56/transformed/lifecycle-process-2.9.2/AndroidManifest.xml:30:17-78
+104                android:value="androidx.startup" />
+104-->[androidx.lifecycle:lifecycle-process:2.9.2] /Users/hournet/.gradle/caches/8.13/transforms/bb0c005fb4685efdbfc17a4cb7553d56/transformed/lifecycle-process-2.9.2/AndroidManifest.xml:31:17-49
+105            <meta-data
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+106                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+106-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+107                android:value="androidx.startup" />
+107-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+108        </provider>
+109
+110        <receiver
+110-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+111            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+111-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+112            android:directBootAware="false"
+112-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+113            android:enabled="true"
+113-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+114            android:exported="true"
+114-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+115            android:permission="android.permission.DUMP" >
+115-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+116            <intent-filter>
+116-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+117                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+117-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+118            </intent-filter>
+119            <intent-filter>
+119-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+120                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+120-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+121            </intent-filter>
+122            <intent-filter>
+122-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+123                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+123-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+124            </intent-filter>
+125            <intent-filter>
+125-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+126                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+126-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+126-->[androidx.profileinstaller:profileinstaller:1.4.0] /Users/hournet/.gradle/caches/8.13/transforms/d1967e8271d110603bb5f378634d9972/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
+127            </intent-filter>
+128        </receiver>
+129    </application>
+130
+131</manifest>

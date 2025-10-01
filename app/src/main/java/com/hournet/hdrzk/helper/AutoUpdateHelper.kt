@@ -9,7 +9,9 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
@@ -262,59 +266,76 @@ fun AutoUpdate(client: OkHttpClient) {
     }
 
     // Диалог обновления
+    // Диалог обновления
     if (showUpdateDialog) {
         AlertDialog(
             onDismissRequest = { showUpdateDialog = false },
             title = { Text(text = "Доступно обновление") },
             text = {
-                Text(text = "Доступна новая версия $actualVersion\n\nТекущая версия: $currentVersion\n\nОбновить?")
+                Text(
+                    text = "Доступна новая версия $actualVersion\n" +
+                            "Текущая версия: $currentVersion"
+                )
             },
             confirmButton = {
-                Button(onClick = {
-                    showUpdateDialog = false
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Основная кнопка — Обновить
+                    Button(
+                        onClick = {
+                            showUpdateDialog = false
 
-                    if (canInstallApks(context)) {
-                        // Есть разрешение - скачиваем и устанавливаем
-                        isDownloading = true
-                        downloadProgress = 0f
-                        errorMessage = ""
+                            if (canInstallApks(context)) {
+                                // Есть разрешение - скачиваем и устанавливаем
+                                isDownloading = true
+                                downloadProgress = 0f
+                                errorMessage = ""
 
-                        scope.launch {
-                            val apkFile = getApkFile(context, actualVersion)
-                            val success = downloadApk(downloadUrl, apkFile, client) { progress ->
-                                downloadProgress = progress
-                            }
+                                scope.launch {
+                                    val apkFile = getApkFile(context, actualVersion)
+                                    val success = downloadApk(downloadUrl, apkFile, client) { progress ->
+                                        downloadProgress = progress
+                                    }
 
-                            isDownloading = false
+                                    isDownloading = false
 
-                            if (success && apkFile.exists()) {
-                                Log.d(TAG, "Download successful, installing APK")
-                                delay(500)
-                                val installed = installApk(context, apkFile)
-                                if (!installed) {
-                                    Log.e(TAG, "Installation failed, might be signature conflict")
-                                    errorMessage = "Не удалось установить обновление"
-                                    showSignatureDialog = true
+                                    if (success && apkFile.exists()) {
+                                        Log.d(TAG, "Download successful, installing APK")
+                                        delay(500)
+                                        val installed = installApk(context, apkFile)
+                                        if (!installed) {
+                                            Log.e(TAG, "Installation failed, might be signature conflict")
+                                            errorMessage = "Не удалось установить обновление"
+                                            showSignatureDialog = true
+                                        }
+                                    } else {
+                                        Log.e(TAG, "Download failed")
+                                        errorMessage = "Не удалось загрузить обновление"
+                                        showSignatureDialog = true
+                                    }
                                 }
                             } else {
-                                Log.e(TAG, "Download failed")
-                                errorMessage = "Не удалось загрузить обновление"
-                                showSignatureDialog = true
+                                // Нет разрешения - запрашиваем
+                                showPermissionDialog = true
                             }
-                        }
-                    } else {
-                        // Нет разрешения - запрашиваем
-                        showPermissionDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Обновить")
                     }
-                }) {
-                    Text(text = "Обновить")
+
+                    // Второстепенная кнопка — Позже
+                    OutlinedButton(
+                        onClick = { showUpdateDialog = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Позже")
+                    }
                 }
             },
-            dismissButton = {
-                Button(onClick = { showUpdateDialog = false }) {
-                    Text(text = "Позже")
-                }
-            }
+            dismissButton = {}
         )
     }
 }
@@ -591,4 +612,49 @@ private fun isVersionNewer(current: String, new: String): Boolean {
         // Если не можем сравнить, считаем что версии разные
         current != new
     }
+}
+
+
+@Composable
+fun UpdateDialogPreview() {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(text = "Доступно обновление") },
+        text = {
+            Text(
+                text = "Доступна новая версия 1\n" +
+                        "Текущая версия: 2"
+            )
+        },
+        confirmButton = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Основная кнопка
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Обновить")
+                }
+
+                // Второстепенная кнопка
+                OutlinedButton(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Позже")
+                }
+            }
+        },
+        dismissButton = {}
+    )
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewUpdateDialog() {
+    UpdateDialogPreview()
 }
