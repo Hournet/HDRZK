@@ -60,6 +60,7 @@ fun AutoUpdate(client: OkHttpClient) {
     var downloadUrl by remember { mutableStateOf("") }
     var pendingInstall by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var downloadedApkFile by remember { mutableStateOf<File?>(null) }
 
     val currentVersion = try {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0.0.0"
@@ -78,10 +79,11 @@ fun AutoUpdate(client: OkHttpClient) {
         scope.launch {
             delay(500)
             if (canInstallApks(context)) {
-                Log.d(TAG, "Permission granted, starting download")
-                pendingInstall = true
+                Log.d(TAG, "Permission granted, will check on resume")
+                // Флаг установлен, загрузка начнется в repeatOnLifecycle
             } else {
                 Log.d(TAG, "Permission still not granted")
+                pendingInstall = false
             }
         }
     }
@@ -93,23 +95,48 @@ fun AutoUpdate(client: OkHttpClient) {
         Log.d(TAG, "Returned from app settings")
     }
 
-    // Отслеживаем жизненный цикл для проверки разрешений
+    // Отслеживаем жизненный цикл для проверки разрешений и установки
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            if (pendingInstall && canInstallApks(context) && actualVersion.isNotEmpty()) {
+            // Если есть скачанный файл и получено разрешение - устанавливаем
+            if (downloadedApkFile != null && canInstallApks(context)) {
+                Log.d(TAG, "App resumed with downloaded APK and permission, installing")
+                val apkFile = downloadedApkFile
+                downloadedApkFile = null
+
+                if (apkFile != null && apkFile.exists()) {
+                    delay(300)
+                    installApk(context, apkFile)
+                }
+            }
+            // Если ожидается загрузка и есть разрешение - загружаем
+            else if (pendingInstall && canInstallApks(context) && actualVersion.isNotEmpty()) {
                 Log.d(TAG, "App resumed with permission, starting download")
                 pendingInstall = false
                 isDownloading = true
                 downloadProgress = 0f
                 errorMessage = ""
+
                 scope.launch {
-                    val success = downloadAndInstallApk(context, actualVersion, downloadUrl, client) { progress ->
+                    val apkFile = getApkFile(context, actualVersion)
+                    val success = downloadApk(downloadUrl, apkFile, client) { progress ->
                         downloadProgress = progress
                     }
+
                     isDownloading = false
-                    if (!success) {
-                        Log.e(TAG, "Download or installation failed")
-                        errorMessage = "Ошибка при скачивании или установке обновления"
+
+                    if (success && apkFile.exists()) {
+                        Log.d(TAG, "Download successful, installing APK")
+                        delay(500)
+                        val installed = installApk(context, apkFile)
+                        if (!installed) {
+                            Log.e(TAG, "Installation failed")
+                            errorMessage = "Ошибка при установке обновления"
+                            showSignatureDialog = true
+                        }
+                    } else {
+                        Log.e(TAG, "Download failed")
+                        errorMessage = "Ошибка при скачивании обновления"
                         showSignatureDialog = true
                     }
                 }
@@ -166,9 +193,12 @@ fun AutoUpdate(client: OkHttpClient) {
     // Диалог для разрешения установки из неизвестных источников
     if (showPermissionDialog) {
         AlertDialog(
-            onDismissRequest = { showPermissionDialog = false },
+            onDismissRequest = {
+                showPermissionDialog = false
+                pendingInstall = false
+            },
             title = { Text(text = "Разрешение требуется") },
-            text = { Text(text = "Для установки обновления необходимо разрешить установку из неизвестных источников.\n\nПосле предоставления разрешения вернитесь в приложение.") },
+            text = { Text(text = "Для установки обновления необходимо разрешить установку из неизвестных источников.\n\nПосле предоставления разрешения вернитесь в приложение, и установка начнется автоматически.") },
             confirmButton = {
                 Button(onClick = {
                     pendingInstall = true
@@ -242,22 +272,38 @@ fun AutoUpdate(client: OkHttpClient) {
             confirmButton = {
                 Button(onClick = {
                     showUpdateDialog = false
+
                     if (canInstallApks(context)) {
+                        // Есть разрешение - скачиваем и устанавливаем
                         isDownloading = true
                         downloadProgress = 0f
                         errorMessage = ""
+
                         scope.launch {
-                            val success = downloadAndInstallApk(context, actualVersion, downloadUrl, client) { progress ->
+                            val apkFile = getApkFile(context, actualVersion)
+                            val success = downloadApk(downloadUrl, apkFile, client) { progress ->
                                 downloadProgress = progress
                             }
+
                             isDownloading = false
-                            if (!success) {
-                                Log.e(TAG, "Download failed, might be signature conflict")
-                                errorMessage = "Не удалось загрузить или установить обновление"
+
+                            if (success && apkFile.exists()) {
+                                Log.d(TAG, "Download successful, installing APK")
+                                delay(500)
+                                val installed = installApk(context, apkFile)
+                                if (!installed) {
+                                    Log.e(TAG, "Installation failed, might be signature conflict")
+                                    errorMessage = "Не удалось установить обновление"
+                                    showSignatureDialog = true
+                                }
+                            } else {
+                                Log.e(TAG, "Download failed")
+                                errorMessage = "Не удалось загрузить обновление"
                                 showSignatureDialog = true
                             }
                         }
                     } else {
+                        // Нет разрешения - запрашиваем
                         showPermissionDialog = true
                     }
                 }) {
@@ -312,6 +358,13 @@ private suspend fun downloadApk(
     return withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Starting download from: $url")
+
+            // Удаляем старый файл если существует
+            if (outputFile.exists()) {
+                outputFile.delete()
+                Log.d(TAG, "Deleted existing APK file")
+            }
+
             val request = okhttp3.Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "HDRZK-AutoUpdater/1.0")
@@ -430,44 +483,6 @@ private fun getApkFile(context: Context, version: String): File {
     // Используем внешний кэш если доступен, иначе внутренний
     val cacheDir = context.externalCacheDir ?: context.cacheDir
     return File(cacheDir, "hdrzk-$version.apk")
-}
-
-suspend fun downloadAndInstallApk(
-    context: Context,
-    version: String,
-    url: String,
-    client: OkHttpClient,
-    onProgress: (Float) -> Unit = {}
-): Boolean {
-    val apkFile = getApkFile(context, version)
-
-    try {
-        // Удаляем старый файл если существует
-        if (apkFile.exists()) {
-            apkFile.delete()
-            Log.d(TAG, "Deleted existing APK file")
-        }
-
-        // Проверяем свободное место
-        val freeSpace = apkFile.parentFile?.freeSpace ?: 0
-        if (freeSpace < 50 * 1024 * 1024) { // Меньше 50MB
-            Log.e(TAG, "Not enough free space: ${freeSpace / (1024 * 1024)}MB")
-            return false
-        }
-
-        val downloadSuccess = downloadApk(url, apkFile, client, onProgress)
-        if (downloadSuccess && apkFile.exists() && apkFile.length() > 0) {
-            Log.d(TAG, "Download successful, starting installation")
-            delay(500) // Небольшая пауза перед установкой
-            return installApk(context, apkFile)
-        } else {
-            Log.e(TAG, "Download failed or file is empty/invalid")
-            return false
-        }
-    } catch (e: Exception) {
-        Log.e(TAG, "Error in downloadAndInstallApk", e)
-        return false
-    }
 }
 
 suspend fun checkForUpdates(

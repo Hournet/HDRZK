@@ -50,10 +50,3 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    HDRZKTheme {
-        Greeting("Android v1.0.1")
-    }
-}
