@@ -11,7 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -84,7 +83,6 @@ fun AutoUpdate(client: OkHttpClient) {
             delay(500)
             if (canInstallApks(context)) {
                 Log.d(TAG, "Permission granted, will check on resume")
-                // Флаг установлен, загрузка начнется в repeatOnLifecycle
             } else {
                 Log.d(TAG, "Permission still not granted")
                 pendingInstall = false
@@ -110,7 +108,12 @@ fun AutoUpdate(client: OkHttpClient) {
 
                 if (apkFile != null && apkFile.exists()) {
                     delay(300)
-                    installApk(context, apkFile)
+                    val installed = installApk(context, apkFile)
+                    if (!installed) {
+                        Log.e(TAG, "Installation failed")
+                        errorMessage = "Ошибка при установке обновления"
+                        showSignatureDialog = true
+                    }
                 }
             }
             // Если ожидается загрузка и есть разрешение - загружаем
@@ -265,7 +268,6 @@ fun AutoUpdate(client: OkHttpClient) {
         )
     }
 
-    // Диалог обновления
     // Диалог обновления
     if (showUpdateDialog) {
         AlertDialog(
@@ -428,7 +430,7 @@ private suspend fun downloadApk(
 
             Log.d(TAG, "Download completed. File size: ${outputFile.length()} bytes")
 
-            if (outputFile.length() < 1024 * 1024) { // Менее 1MB - подозрительно
+            if (outputFile.length() < 1024 * 1024) {
                 Log.e(TAG, "Downloaded file too small: ${outputFile.length()} bytes")
                 return@withContext false
             }
@@ -448,11 +450,9 @@ private suspend fun downloadApk(
 
 private fun isValidApk(file: File): Boolean {
     return try {
-        // Проверяем ZIP signature (APK это ZIP файл)
         val bytes = ByteArray(4)
         file.inputStream().use { it.read(bytes) }
 
-        // ZIP файл начинается с "PK"
         bytes[0] == 0x50.toByte() && bytes[1] == 0x4B.toByte() &&
                 (bytes[2] == 0x03.toByte() || bytes[2] == 0x05.toByte() || bytes[2] == 0x07.toByte()) &&
                 file.length() > 0
@@ -464,27 +464,34 @@ private fun isValidApk(file: File): Boolean {
 
 private fun installApk(context: Context, apkFile: File): Boolean {
     return try {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.applicationContext.packageName}.provider",
-                    apkFile
-                )
-            } else {
-                Uri.fromFile(apkFile)
-            }
-
-            setDataAndType(apkUri, "application/vnd.android.package-archive")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            }
-        }
-
         Log.d(TAG, "Starting installation of: ${apkFile.absolutePath}")
         Log.d(TAG, "File size: ${apkFile.length()} bytes")
+
+        val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                apkFile
+            )
+        } else {
+            Uri.fromFile(apkFile)
+        }
+
+        // КРИТИЧНО: используем ACTION_INSTALL_PACKAGE для установки обновления
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+                data = apkUri
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, context.packageName)
+            }
+        } else {
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(apkUri, "application/vnd.android.package-archive")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        }
 
         // Проверяем что можем запустить Intent
         if (intent.resolveActivity(context.packageManager) != null) {
@@ -501,9 +508,8 @@ private fun installApk(context: Context, apkFile: File): Boolean {
 }
 
 private fun getApkFile(context: Context, version: String): File {
-    // Используем внешний кэш если доступен, иначе внутренний
     val cacheDir = context.externalCacheDir ?: context.cacheDir
-    return File(cacheDir, "hdrzk-$version.apk")
+    return File(cacheDir, "hdrzk-update.apk")
 }
 
 suspend fun checkForUpdates(
@@ -541,13 +547,11 @@ suspend fun checkForUpdates(
                     val assets = json.getJSONArray("assets")
                     var downloadUrl = ""
 
-                    // Ищем APK файл в релизе
                     for (i in 0 until assets.length()) {
                         val asset = assets.getJSONObject(i)
                         val name = asset.getString("name")
                         Log.d(TAG, "Found asset: $name")
 
-                        // Ищем APK файл (может быть app-release.apk или hdrzk-release.apk)
                         if (name.endsWith(".apk") && (name.contains("release") || name.contains("hdrzk"))) {
                             downloadUrl = asset.getString("browser_download_url")
                             Log.d(TAG, "Selected APK: $name")
@@ -579,7 +583,6 @@ suspend fun checkForUpdates(
 
 private fun isVersionNewer(current: String, new: String): Boolean {
     return try {
-        // Парсим версии как семантические (major.minor.patch)
         val currentParts = current.split(".").map {
             it.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
         }
@@ -609,12 +612,11 @@ private fun isVersionNewer(current: String, new: String): Boolean {
         false
     } catch (e: Exception) {
         Log.e(TAG, "Error comparing versions: $current vs $new", e)
-        // Если не можем сравнить, считаем что версии разные
         current != new
     }
 }
 
-
+@Preview(showBackground = true)
 @Composable
 fun UpdateDialogPreview() {
     AlertDialog(
@@ -631,7 +633,6 @@ fun UpdateDialogPreview() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Основная кнопка
                 Button(
                     onClick = {},
                     modifier = Modifier.fillMaxWidth()
@@ -639,7 +640,6 @@ fun UpdateDialogPreview() {
                     Text("Обновить")
                 }
 
-                // Второстепенная кнопка
                 OutlinedButton(
                     onClick = {},
                     modifier = Modifier.fillMaxWidth()
@@ -650,11 +650,4 @@ fun UpdateDialogPreview() {
         },
         dismissButton = {}
     )
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewUpdateDialog() {
-    UpdateDialogPreview()
 }
