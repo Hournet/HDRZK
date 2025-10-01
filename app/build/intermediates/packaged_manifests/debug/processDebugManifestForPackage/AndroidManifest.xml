@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hournet.hdrzk.debug"
     android:versionCode="1"
-    android:versionName="0.0.2" >
+    android:versionName="0.0.1" >
 
     <uses-sdk
         android:minSdkVersion="30"
@@ -45,6 +45,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:testOnly="true"
         android:theme="@style/Theme.HDRZK"
         android:usesCleartextTraffic="false" >
 
