@@ -18,8 +18,8 @@ plugins {
                 applicationId = "com.hournet.hdrzk"
                 minSdk = 30
                 targetSdk = 36
-                versionCode = 7
-                versionName = "0.0.4"
+                versionCode = 1
+                versionName = "0.0.1"
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             }
 
